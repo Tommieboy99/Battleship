@@ -158,4 +158,61 @@ describe('Gameboard', () => {
       board.receiveAttack(5, 5);
     }).toThrow('You cant attack a coordinate twice');
   });
+
+  test('After placing a ship right, the coordinates are stored in the ships array', () => {
+    board.placeShip(5, 5, 2, 'right');
+    expect(board.ships).toContainEqual([
+      [5, 5],
+      [5, 6],
+    ]);
+  });
+
+  test('After placing a ship left, the coordinates are stored in the ships array', () => {
+    board.placeShip(5, 5, 2, 'left');
+    expect(board.ships).toContainEqual([
+      [5, 5],
+      [5, 4],
+    ]);
+  });
+
+  test('After placing a ship up, the coordinates are stored in the ships array', () => {
+    board.placeShip(5, 5, 2, 'up');
+    expect(board.ships).toContainEqual([
+      [5, 5],
+      [4, 5],
+    ]);
+  });
+
+  test('After placing a ship down, the coordinates are stored in the ships array', () => {
+    board.placeShip(5, 5, 2, 'down');
+    expect(board.ships).toContainEqual([
+      [5, 5],
+      [6, 5],
+    ]);
+  });
+
+  test('Hitting all parts of one ship and checking that areAllShipsSunk() returns false', () => {
+    board.placeShip(5, 5, 2, 'right');
+    board.placeShip(2, 2, 2, 'up');
+
+    board.receiveAttack(2, 2);
+    board.receiveAttack(1, 2);
+
+    expect(board.areAllShipsSunk()).toBe(false);
+  });
+
+  test('Hitting all parts of all ships results in areAllShipsSunk() returning true', () => {
+    board.placeShip(5, 5, 2, 'right');
+    board.placeShip(2, 2, 2, 'up');
+
+    board.receiveAttack(5, 5);
+    board.receiveAttack(5, 6);
+
+    board.receiveAttack(2, 2);
+    board.receiveAttack(1, 2);
+
+    expect(board.areAllShipsSunk()).toBe(true);
+  });
 });
+
+//Gameboards should be able to report whether or not all of their ships have been sunk.
