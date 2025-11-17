@@ -213,6 +213,10 @@ describe('Gameboard', () => {
 
     expect(board.areAllShipsSunk()).toBe(true);
   });
+
+  test('No ships placed', () => {
+    expect(board.areAllShipsSunk()).toBe(true);
+  });
 });
 
 //Gameboards should be able to report whether or not all of their ships have been sunk.
