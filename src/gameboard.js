@@ -5,6 +5,7 @@ export class Gameboard {
     this.grid = this.createGrid();
     this.missedShots = [];
     this.hitShots = [];
+    this.ships = [];
   }
 
   createGrid() {
@@ -24,6 +25,7 @@ export class Gameboard {
 
   placeShip(x, y, length, direction) {
     const ship = new Ship(length);
+    let shipCoordinates = [];
 
     switch (direction) {
       case 'left':
@@ -37,7 +39,10 @@ export class Gameboard {
 
         for (let col = y; col > y - length; col--) {
           this.grid[x][col] = ship;
+          shipCoordinates.push([x, col]);
         }
+
+        this.ships.push(shipCoordinates);
 
         break;
 
@@ -52,7 +57,10 @@ export class Gameboard {
 
         for (let col = y; col < y + length; col++) {
           this.grid[x][col] = ship;
+          shipCoordinates.push([x, col]);
         }
+
+        this.ships.push(shipCoordinates);
 
         break;
 
@@ -67,7 +75,10 @@ export class Gameboard {
 
         for (let row = x; row > x - length; row--) {
           this.grid[row][y] = ship;
+          shipCoordinates.push([row, y]);
         }
+
+        this.ships.push(shipCoordinates);
 
         break;
 
@@ -82,7 +93,10 @@ export class Gameboard {
 
         for (let row = x; row < x + length; row++) {
           this.grid[row][y] = ship;
+          shipCoordinates.push([row, y]);
         }
+
+        this.ships.push(shipCoordinates);
 
         break;
 
@@ -107,5 +121,14 @@ export class Gameboard {
         this.missedShots.push([x, y]);
       }
     }
+  }
+
+  areAllShipsSunk() {
+    //Loop through each ship’s coordinates array.
+    // Take the first coordinate [x, y] of that ship.
+    // Access this.grid[x][y] to get the Ship instance.
+    // Check if ship.isSunk() (or whatever method/property you have) returns true or false.
+    // If any ship is not sunk, return false immediately.
+    // If all ships are sunk, return true.
   }
 }
