@@ -3,6 +3,8 @@ import { Ship } from './ship';
 export class Gameboard {
   constructor() {
     this.grid = this.createGrid();
+    this.missedShots = [];
+    this.hitShots = [];
   }
 
   createGrid() {
@@ -21,11 +23,89 @@ export class Gameboard {
   }
 
   placeShip(x, y, length, direction) {
-    if (this.grid[x][y] instanceof Ship) {
-      throw new Error('Cell is already occupied');
-    }
-
     const ship = new Ship(length);
-    this.grid[x][y] = ship;
+
+    switch (direction) {
+      case 'left':
+        for (let col = y; col > y - length; col--) {
+          if (col < 0) throw new Error('Ship placement out of bounds');
+
+          if (this.grid[x][col] instanceof Ship) {
+            throw new Error('Cell is already occupied');
+          }
+        }
+
+        for (let col = y; col > y - length; col--) {
+          this.grid[x][col] = ship;
+        }
+
+        break;
+
+      case 'right':
+        for (let col = y; col < y + length; col++) {
+          if (col > 9) throw new Error('Ship placement out of bounds');
+
+          if (this.grid[x][col] instanceof Ship) {
+            throw new Error('Cell is already occupied');
+          }
+        }
+
+        for (let col = y; col < y + length; col++) {
+          this.grid[x][col] = ship;
+        }
+
+        break;
+
+      case 'up':
+        for (let row = x; row > x - length; row--) {
+          if (row < 0) throw new Error('Ship placement out of bounds');
+
+          if (this.grid[row][y] instanceof Ship) {
+            throw new Error('Cell is already occupied');
+          }
+        }
+
+        for (let row = x; row > x - length; row--) {
+          this.grid[row][y] = ship;
+        }
+
+        break;
+
+      case 'down':
+        for (let row = x; row < x + length; row++) {
+          if (row > 9) throw new Error('Ship placement out of bounds');
+
+          if (this.grid[row][y] instanceof Ship) {
+            throw new Error('Cell is already occupied');
+          }
+        }
+
+        for (let row = x; row < x + length; row++) {
+          this.grid[row][y] = ship;
+        }
+
+        break;
+
+      default:
+        throw new Error('Invalid direction');
+    }
+  }
+
+  receiveAttack(x, y) {
+    if (this.grid[x][y] instanceof Ship) {
+      if (this.hitShots.some((coord) => coord[0] === x && coord[1] === y)) {
+        throw new Error('You cant attack a coordinate twice');
+      } else {
+        this.hitShots.push([x, y]);
+        const ship = this.grid[x][y];
+        ship.hit();
+      }
+    } else {
+      if (this.missedShots.some((coord) => coord[0] === x && coord[1] === y)) {
+        throw new Error('You cant attack a coordinate twice');
+      } else {
+        this.missedShots.push([x, y]);
+      }
+    }
   }
 }
