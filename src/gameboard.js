@@ -124,11 +124,15 @@ export class Gameboard {
   }
 
   areAllShipsSunk() {
-    //Loop through each ship’s coordinates array.
-    // Take the first coordinate [x, y] of that ship.
-    // Access this.grid[x][y] to get the Ship instance.
-    // Check if ship.isSunk() (or whatever method/property you have) returns true or false.
-    // If any ship is not sunk, return false immediately.
-    // If all ships are sunk, return true.
+    for (let i = 0; i < this.ships.length; i++) {
+      const coordinate = this.ships[i][0];
+      const x = coordinate[0];
+      const y = coordinate[1];
+      const ship = this.grid[x][y];
+
+      if (!ship.isSunk) return false;
+    }
+
+    return true;
   }
 }
