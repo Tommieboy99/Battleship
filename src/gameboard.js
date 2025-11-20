@@ -2,30 +2,20 @@ import { Ship } from './ship';
 
 export class Gameboard {
   constructor() {
-    this.grid = this.createGrid();
+    this.board = this.createBoard();
     this.missedShots = [];
     this.hitShots = [];
     this.ships = [];
   }
 
-  createGrid() {
-    let grid = [];
-    const rows = 10;
-    const cols = 10;
-
-    for (let i = 0; i < rows; i++) {
-      grid[i] = [];
-      for (let j = 0; j < cols; j++) {
-        grid[i][j] = '';
-      }
-    }
-
-    return grid;
+  createBoard() {
+    return Array.from({ length: 10 }, () =>
+      Array.from({ length: 10 }, () => '')
+    );
   }
 
   placeShip(x, y, length, direction) {
     const ship = new Ship(length);
-    let shipCoordinates = [];
 
     switch (direction) {
       case 'left':
@@ -39,10 +29,9 @@ export class Gameboard {
 
         for (let col = y; col > y - length; col--) {
           this.grid[x][col] = ship;
-          shipCoordinates.push([x, col]);
         }
 
-        this.ships.push(shipCoordinates);
+        this.ships.push(ship);
 
         break;
 
@@ -57,10 +46,9 @@ export class Gameboard {
 
         for (let col = y; col < y + length; col++) {
           this.grid[x][col] = ship;
-          shipCoordinates.push([x, col]);
         }
 
-        this.ships.push(shipCoordinates);
+        this.ships.push(ship);
 
         break;
 
@@ -75,10 +63,9 @@ export class Gameboard {
 
         for (let row = x; row > x - length; row--) {
           this.grid[row][y] = ship;
-          shipCoordinates.push([row, y]);
         }
 
-        this.ships.push(shipCoordinates);
+        this.ships.push(ship);
 
         break;
 
@@ -93,10 +80,9 @@ export class Gameboard {
 
         for (let row = x; row < x + length; row++) {
           this.grid[row][y] = ship;
-          shipCoordinates.push([row, y]);
         }
 
-        this.ships.push(shipCoordinates);
+        this.ships.push(ship);
 
         break;
 
@@ -108,31 +94,24 @@ export class Gameboard {
   receiveAttack(x, y) {
     if (this.grid[x][y] instanceof Ship) {
       if (this.hitShots.some((coord) => coord[0] === x && coord[1] === y)) {
-        throw new Error('You cant attack a coordinate twice');
+        return 'Already hit';
       } else {
         this.hitShots.push([x, y]);
         const ship = this.grid[x][y];
         ship.hit();
+        return 'hit';
       }
     } else {
       if (this.missedShots.some((coord) => coord[0] === x && coord[1] === y)) {
-        throw new Error('You cant attack a coordinate twice');
+        return 'Already missed';
       } else {
         this.missedShots.push([x, y]);
+        return 'miss';
       }
     }
   }
 
   areAllShipsSunk() {
-    for (let i = 0; i < this.ships.length; i++) {
-      const coordinate = this.ships[i][0];
-      const x = coordinate[0];
-      const y = coordinate[1];
-      const ship = this.grid[x][y];
-
-      if (!ship.isSunk) return false;
-    }
-
-    return true;
+    return this.ships.every((ship) => ship.isSunk);
   }
 }
