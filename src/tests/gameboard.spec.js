@@ -1,222 +1,210 @@
 import { Gameboard } from '../gameboard';
 import { Ship } from '../ship';
 
-describe('Gameboard', () => {
-  let board;
+let gameboard;
 
-  beforeEach(() => {
-    board = new Gameboard();
+beforeEach(() => {
+  gameboard = new Gameboard();
+});
+
+describe('createBoard()', () => {
+  test('Board bevat 10 rijen', () => {
+    expect(gameboard.board.length).toBe(10);
   });
 
-  test('Does Gameboard exist', () => {
-    expect(board).toBeTruthy();
-  });
-
-  test('Gameboard has 10 rows', () => {
-    expect(board.grid.length).toBe(10);
-  });
-
-  test('Each row has 10 columns', () => {
-    for (let i = 0; i < board.grid.length; i++) {
-      expect(board.grid[i].length).toBe(10);
+  test('Board bevat 10 kolommen', () => {
+    for (let i = 0; i < gameboard.board.length; i++) {
+      expect(gameboard.board[i].length).toBe(10);
     }
-  });
-
-  test('All cells are empty strings', () => {
-    for (let i = 0; i < board.grid.length; i++) {
-      for (let j = 0; j < board.grid[i].length; j++) {
-        expect(board.grid[i][j]).toBe('');
-      }
-    }
-  });
-
-  test('placeShip of length 2 at (x, y) with a direction of left', () => {
-    board.placeShip(1, 5, 2, 'left');
-    expect(board.grid[1][5]).toBeInstanceOf(Ship);
-    expect(board.grid[1][4]).toBeInstanceOf(Ship);
-  });
-
-  test('placeShip of length 2 at (x, y) with a direction of right', () => {
-    board.placeShip(1, 5, 2, 'right');
-    expect(board.grid[1][5]).toBeInstanceOf(Ship);
-    expect(board.grid[1][6]).toBeInstanceOf(Ship);
-  });
-
-  test('placeShip of length 2 at (x, y) with a direction of up', () => {
-    board.placeShip(1, 5, 2, 'up');
-    expect(board.grid[1][5]).toBeInstanceOf(Ship);
-    expect(board.grid[0][5]).toBeInstanceOf(Ship);
-  });
-
-  test('placeShip of length 2 at (x, y) with a direction of down', () => {
-    board.placeShip(1, 5, 2, 'down');
-    expect(board.grid[1][5]).toBeInstanceOf(Ship);
-    expect(board.grid[2][5]).toBeInstanceOf(Ship);
-  });
-
-  test('Placing a ship on a occupied cell throws an ERROR', () => {
-    board.placeShip(1, 4, 2, 'left');
-    expect(() => {
-      board.placeShip(1, 3, 2, 'left');
-    }).toThrow('Cell is already occupied');
-  });
-
-  test('placing ship out of bounds throws error on all directions', () => {
-    expect(() => board.placeShip(0, 0, 3, 'left')).toThrow(
-      'Ship placement out of bounds'
-    );
-
-    expect(() => board.placeShip(8, 8, 3, 'right')).toThrow(
-      'Ship placement out of bounds'
-    );
-
-    expect(() => board.placeShip(1, 5, 3, 'up')).toThrow(
-      'Ship placement out of bounds'
-    );
-
-    expect(() => board.placeShip(8, 7, 3, 'down')).toThrow(
-      'Ship placement out of bounds'
-    );
-  });
-
-  test('placeShip fits exactly at the left edge', () => {
-    board.placeShip(0, 1, 2, 'left');
-    expect(board.grid[0][1]).toBeInstanceOf(Ship);
-    expect(board.grid[0][0]).toBeInstanceOf(Ship);
-  });
-
-  test('placeShip fits exactly at the right edge', () => {
-    board.placeShip(0, 8, 2, 'right');
-    expect(board.grid[0][8]).toBeInstanceOf(Ship);
-    expect(board.grid[0][9]).toBeInstanceOf(Ship);
-  });
-
-  test('placeShip fits exactly at the up edge', () => {
-    board.placeShip(1, 0, 2, 'up');
-    expect(board.grid[1][0]).toBeInstanceOf(Ship);
-    expect(board.grid[0][0]).toBeInstanceOf(Ship);
-  });
-
-  test('placeShip fits exactly at the down edge', () => {
-    board.placeShip(8, 0, 2, 'down');
-    expect(board.grid[8][0]).toBeInstanceOf(Ship);
-    expect(board.grid[9][0]).toBeInstanceOf(Ship);
-  });
-
-  test('placeShip with invalid direction throws error', () => {
-    expect(() => board.placeShip(1, 1, 2, 'diagonal')).toThrow(
-      'Invalid direction'
-    );
-  });
-
-  test('placeShip of length 4 at (x, y) with direction down', () => {
-    board.placeShip(3, 3, 4, 'down');
-    for (let i = 3; i < 7; i++) {
-      expect(board.grid[i][3]).toBeInstanceOf(Ship);
-    }
-  });
-
-  test('correctly identifies a ship at given coordinates and triggers a hit', () => {
-    board.placeShip(5, 5, 3, 'right');
-    board.receiveAttack(5, 5);
-
-    const ship = board.grid[5][5];
-
-    expect(ship.numberOfHits).toBe(1);
-  });
-
-  test('correctly identifies an empty cell at given coordinates and handles a miss', () => {
-    board.placeShip(5, 5, 3, 'right');
-    board.receiveAttack(3, 3);
-
-    expect(board.missedShots).toContainEqual([3, 3]);
-  });
-
-  test('the same ship is hit twice on different coordinates', () => {
-    board.placeShip(5, 5, 3, 'right');
-    board.receiveAttack(5, 5);
-    board.receiveAttack(5, 6);
-
-    const ship = board.grid[5][5];
-
-    expect(ship.numberOfHits).toBe(2);
-  });
-
-  test('Twee aanvallen op dezelfde empty cell resulteert in een error', () => {
-    board.receiveAttack(5, 5);
-
-    expect(() => {
-      board.receiveAttack(5, 5);
-    }).toThrow('You cant attack a coordinate twice');
-  });
-
-  test('Twee aanvallen op dezelfde coordinaten van het schip resulteert in een error', () => {
-    board.placeShip(5, 5, 3, 'right');
-    board.receiveAttack(5, 5);
-
-    expect(() => {
-      board.receiveAttack(5, 5);
-    }).toThrow('You cant attack a coordinate twice');
-  });
-
-  test('After placing a ship right, the coordinates are stored in the ships array', () => {
-    board.placeShip(5, 5, 2, 'right');
-    expect(board.ships).toContainEqual([
-      [5, 5],
-      [5, 6],
-    ]);
-  });
-
-  test('After placing a ship left, the coordinates are stored in the ships array', () => {
-    board.placeShip(5, 5, 2, 'left');
-    expect(board.ships).toContainEqual([
-      [5, 5],
-      [5, 4],
-    ]);
-  });
-
-  test('After placing a ship up, the coordinates are stored in the ships array', () => {
-    board.placeShip(5, 5, 2, 'up');
-    expect(board.ships).toContainEqual([
-      [5, 5],
-      [4, 5],
-    ]);
-  });
-
-  test('After placing a ship down, the coordinates are stored in the ships array', () => {
-    board.placeShip(5, 5, 2, 'down');
-    expect(board.ships).toContainEqual([
-      [5, 5],
-      [6, 5],
-    ]);
-  });
-
-  test('Hitting all parts of one ship and checking that areAllShipsSunk() returns false', () => {
-    board.placeShip(5, 5, 2, 'right');
-    board.placeShip(2, 2, 2, 'up');
-
-    board.receiveAttack(2, 2);
-    board.receiveAttack(1, 2);
-
-    expect(board.areAllShipsSunk()).toBe(false);
-  });
-
-  test('Hitting all parts of all ships results in areAllShipsSunk() returning true', () => {
-    board.placeShip(5, 5, 2, 'right');
-    board.placeShip(2, 2, 2, 'up');
-
-    board.receiveAttack(5, 5);
-    board.receiveAttack(5, 6);
-
-    board.receiveAttack(2, 2);
-    board.receiveAttack(1, 2);
-
-    expect(board.areAllShipsSunk()).toBe(true);
-  });
-
-  test('No ships placed', () => {
-    expect(board.areAllShipsSunk()).toBe(true);
   });
 });
 
-//Gameboards should be able to report whether or not all of their ships have been sunk.
+function expectShipPlaced(result, expectedCoords, gameboard) {
+  expect(result.ok).toBe(true);
+  expect(result.shipCoordinates).toEqual(expectedCoords);
+
+  for (const [x, y] of expectedCoords) {
+    expect(gameboard.hasShipAt(x, y)).toBe(true);
+  }
+}
+
+describe('placeShip()', () => {
+  let result;
+
+  beforeEach(() => {
+    result = null;
+  });
+
+  //Input Validation
+  test('Er kan geen schip worden geplaatst bij x < 0 || x > 9', () => {
+    result = gameboard.placeShip(10, 5, 1);
+    expect(result.ok).toBe(false);
+    expect(result.error).toBe('OUT_OF_BOUNDS');
+
+    result = gameboard.placeShip(-2, 7, 1);
+    expect(result.ok).toBe(false);
+    expect(result.error).toBe('OUT_OF_BOUNDS');
+  });
+
+  test('Er kan geen schip worden geplaatst bij  y < 0 || y > 9', () => {
+    result = gameboard.placeShip(5, 10, 1);
+    expect(result.ok).toBe(false);
+    expect(result.error).toBe('OUT_OF_BOUNDS');
+
+    result = gameboard.placeShip(7, -2, 1);
+    expect(result.ok).toBe(false);
+    expect(result.error).toBe('OUT_OF_BOUNDS');
+  });
+
+  test('Er kan geen schip worden geplaatst zonder length', () => {
+    result = gameboard.placeShip(5, 6);
+    expect(result.ok).toBe(false);
+    expect(result.error).toBe('MISSING_LENGTH_ARG');
+  });
+
+  test('Er kan geen schip worden geplaats op een ander schip', () => {
+    gameboard.placeShip(5, 6, 1);
+    result = gameboard.placeShip(5, 6, 1);
+
+    expect(result.ok).toBe(false);
+    expect(result.error).toBe('SHIP_OVERLAP');
+
+    gameboard.placeShip(4, 4, 5, 'horizontal');
+    result = gameboard.placeShip(2, 6, 4, 'vertical');
+    expect(result.ok).toBe(false);
+    expect(result.error).toBe('SHIP_OVERLAP');
+  });
+
+  test('Invalid orientation geeft foutmelding', () => {
+    result = gameboard.placeShip(3, 3, 2, 'diagonal');
+    expect(result.ok).toBe(false);
+    expect(result.error).toBe('INVALID_ORIENTATION');
+  });
+
+  //Schepen plaatsen op het bord
+  test('Plaats een schip op het board', () => {
+    result = gameboard.placeShip(4, 5, 1);
+    expectShipPlaced(result, [[4, 5]], gameboard);
+  });
+
+  test('Een schip plaatsen met length 2 (horizontaal / verticaal)', () => {
+    result = gameboard.placeShip(3, 4, 2, 'horizontal');
+    expectShipPlaced(
+      result,
+      [
+        [3, 4],
+        [3, 5],
+      ],
+      gameboard
+    );
+
+    result = gameboard.placeShip(6, 3, 2, 'vertical');
+    expectShipPlaced(
+      result,
+      [
+        [6, 3],
+        [7, 3],
+      ],
+      gameboard
+    );
+  });
+
+  test('Ship past automatisch binnen het bord als het anders out of bounds zou gaan (horizontaal)', () => {
+    result = gameboard.placeShip(3, 9, 2, 'horizontal');
+    expectShipPlaced(
+      result,
+      [
+        [3, 9],
+        [3, 8],
+      ],
+      gameboard
+    );
+  });
+
+  test('Ship past automatisch binnen het bord als het anders out of bounds zou gaan (verticaal)', () => {
+    result = gameboard.placeShip(9, 0, 2, 'vertical');
+    expectShipPlaced(
+      result,
+      [
+        [9, 0],
+        [8, 0],
+      ],
+      gameboard
+    );
+  });
+});
+
+describe('receiveAttack()', () => {
+  let result;
+
+  beforeEach(() => {
+    result = null;
+  });
+
+  //Input validation
+  test('Er kan geen aanval worden gedaan op coordinaten buiten het board', () => {
+    result = gameboard.receiveAttack(10, 5);
+    expect(result.hit).toBe(false);
+    expect(result.error).toBe('ATTACK_OUT_OF_BOUNDS');
+
+    result = gameboard.receiveAttack(5, 10);
+    expect(result.hit).toBe(false);
+    expect(result.error).toBe('ATTACK_OUT_OF_BOUNDS');
+  });
+
+  test('Er kan geen aanval worden gedaan op een coordinaat die al is aangevallen', () => {
+    gameboard.receiveAttack(5, 5);
+    result = gameboard.receiveAttack(5, 5);
+
+    expect(result.hit).toBe(false);
+    expect(result.error).toBe('ALREADY_ATTACKED_COORDINATE');
+  });
+
+  test('Wordt het juiste schip geraakt', () => {
+    const shipA = gameboard.placeShip(2, 2, 2, 'horizontal').ship;
+    const shipB = gameboard.placeShip(5, 5, 3, 'vertical').ship;
+
+    result = gameboard.receiveAttack(2, 2);
+
+    expect(result.hit).toBe(true);
+    expect(shipA.numberOfHits).toBe(1);
+    expect(shipB.numberOfHits).toBe(0);
+  });
+
+  test('Gemiste schoten worden geregistreerd', () => {
+    result = gameboard.receiveAttack(2, 2);
+
+    expect(gameboard.missedShots).toContainEqual([2, 2]);
+    expect(result.hit).toBe(false);
+  });
+});
+
+describe('areAllShipsSunk()', () => {
+  //Gameboards should be able to report whether or not all of their ships have been sunk.
+  let result;
+
+  beforeEach(() => {
+    result = null;
+  });
+
+  test('Registreren dat alle schepen gezonken zijn op het board', () => {
+    gameboard.placeShip(0, 0, 4, 'horizontal');
+    gameboard.receiveAttack(0, 0);
+    gameboard.receiveAttack(0, 1);
+    gameboard.receiveAttack(0, 2);
+    gameboard.receiveAttack(0, 3);
+
+    result = gameboard.areAllShipsSunk();
+    expect(result).toBe(true);
+  });
+
+  test('Registreren dat alle schepen niet gezonken zijn op het board', () => {
+    gameboard.placeShip(0, 0, 4, 'horizontal');
+    gameboard.receiveAttack(0, 0);
+    gameboard.receiveAttack(0, 1);
+    gameboard.receiveAttack(0, 2);
+
+    result = gameboard.areAllShipsSunk();
+    expect(result).toBe(false);
+  });
+});
