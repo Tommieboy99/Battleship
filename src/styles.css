@@ -99,3 +99,15 @@ body {
 .boardCell {
   border: 1px solid black;
 }
+
+.ship {
+  background-color: gray;
+}
+
+.missed {
+  background-color: yellow;
+}
+
+.hit {
+  background-color: red;
+}
