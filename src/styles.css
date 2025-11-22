@@ -95,3 +95,7 @@ body {
   display: flex;
   gap: 0.5rem;
 }
+
+.boardCell {
+  border: 1px solid black;
+}
