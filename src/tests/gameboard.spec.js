@@ -208,3 +208,11 @@ describe('areAllShipsSunk()', () => {
     expect(result).toBe(false);
   });
 });
+
+describe('placeShipsRandomly()', () => {
+  test('placeShipsRandomly places all ships', () => {
+    gameboard.placeShipsRandomly();
+
+    expect(gameboard.ships.length).toBe(5);
+  });
+});
