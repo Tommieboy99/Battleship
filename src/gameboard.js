@@ -9,9 +9,7 @@ export class Gameboard {
   }
 
   createBoard() {
-    return Array.from({ length: 10 }, () =>
-      Array.from({ length: 10 }, () => '')
-    );
+    return Array.from({ length: 10 }, () => Array.from({ length: 10 }, () => ''));
   }
 
   placeShip(x, y, length, orientation = 'horizontal') {
@@ -95,5 +93,23 @@ export class Gameboard {
 
   areAllShipsSunk() {
     return this.ships.every((ship) => ship.isSunk);
+  }
+
+  placeShipsRandomly() {
+    const shipLengths = [2, 3, 3, 4, 5]; // all ships[lenghts]
+
+    shipLengths.forEach((shipLength) => {
+      let placed = false;
+
+      while (!placed) {
+        const x = Math.floor(Math.random() * 10); //random x 0 to 9
+        const y = Math.floor(Math.random() * 10); //random y 0 to 9
+        const orientation = Math.random() < 0.5 ? 'horizontal' : 'vertical';
+
+        let result = this.placeShip(x, y, shipLength, orientation);
+
+        if (result.ok) placed = true;
+      }
+    });
   }
 }
