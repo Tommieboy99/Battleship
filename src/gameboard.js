@@ -96,6 +96,7 @@ export class Gameboard {
   }
 
   placeShipsRandomly() {
+    this.board = this.createBoard();
     const shipLengths = [2, 3, 3, 4, 5]; // all ships[lenghts]
 
     shipLengths.forEach((shipLength) => {
