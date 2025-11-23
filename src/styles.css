@@ -32,7 +32,7 @@ body {
 .app {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 2rem;
 }
 
 .appHeader {
@@ -65,7 +65,7 @@ body {
 .gameDisplay {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 2rem;
 }
 
 .gameInstructions {
