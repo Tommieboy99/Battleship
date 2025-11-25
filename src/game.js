@@ -1,51 +1,196 @@
 import { Player } from './player';
-import { placeShipsBtn, renderGameBoards, renderGameMessage } from './ui';
+import {
+  placeShipsBtn,
+  playerAttackListener,
+  renderComputerPlayerGameboard,
+  renderRealPlayerGameboard,
+  startGameBtn,
+  renderStateMessage,
+  renderTurnMessage,
+  renderErrorMessage,
+  renderWonMessage,
+} from './ui';
 
 export class Game {
   constructor() {
-    this.player = new Player('real');
-    this.computer = new Player('computer');
-    this.turn = null;
-    this.state = null; // 'placing, placed, battling, finshed'
+    this.realPlayer = new Player('real');
+    this.computerPlayer = new Player('computer');
+    this.turn = null; // player, computer
+    this.state = null; // init, pre, in, post
+    this.error = null;
+    this.winner = null;
   }
 
   init() {
-    this.state = 'placing';
-    this.gameMessage();
+    renderRealPlayerGameboard(this.realPlayer);
+    renderComputerPlayerGameboard(this.computerPlayer);
+    this.placeShips();
+    this.startGame();
+    this.realPlayerAttack();
 
-    this.updateGameBoards();
-    this.enablePlaceShips();
+    this.state = 'init';
+    this.stateMessage();
   }
 
-  updateGameBoards() {
-    renderGameBoards(this.player, this.computer);
-  }
-
-  enablePlaceShips() {
+  placeShips() {
     placeShipsBtn(() => {
-      this.placeShipsRandomly();
+      if (this.state === 'in') {
+        return this.showError('IN_BATTLE_SHIPS');
+      }
+
+      this.realPlayer.gameboard.placeShipsRandomly();
+      this.computerPlayer.gameboard.placeShipsRandomly();
+      renderRealPlayerGameboard(this.realPlayer);
+      renderComputerPlayerGameboard(this.computerPlayer);
+      this.state = 'pre';
+      this.stateMessage();
     });
   }
 
-  gameMessage() {
-    renderGameMessage(this.state);
+  startGame() {
+    startGameBtn(() => {
+      if (this.state === 'in') {
+        return this.showError('IN_BATTLE_START');
+      }
+
+      if (this.state === 'init') {
+        return this.showError('NO_SHIPS_START');
+      }
+
+      this.state = 'in';
+      this.turn = 'player';
+      this.stateMessage();
+
+      setTimeout(() => this.turnMessage(), 750);
+    });
   }
 
-  placeShipsRandomly() {
-    this.player.gameboard.placeShipsRandomly();
-    this.computer.gameboard.placeShipsRandomly();
+  realPlayerAttack() {
+    playerAttackListener((x, y) => {
+      if (this.state !== 'in') {
+        return this.showError('NO_BATTLE_ATTACK');
+      }
 
-    this.state = 'placed';
-    this.updateGameBoards();
-    this.gameMessage();
+      if (this.turn !== 'player') {
+        return this.showError('NO_TURN_ATTACK');
+      }
+
+      const result = this.computerPlayer.gameboard.receiveAttack(x, y);
+
+      if (result.error === 'ALREADY_ATTACKED_COORDINATE') {
+        return this.showError('NO_TWICE_ATTACK');
+      }
+
+      renderComputerPlayerGameboard(this.computerPlayer);
+      const isWon = this.gameOver();
+      if (isWon) {
+        setTimeout(() => this.resetGame(), 2000);
+        return;
+      }
+      this.switchTurn();
+    });
+  }
+
+  switchTurn() {
+    if (this.state !== 'in') return;
+
+    if (this.turn === 'player') {
+      this.turn = 'computer';
+      this.turnMessage();
+      setTimeout(() => this.computerPlayerAttack(), 1000);
+    } else {
+      this.turn = 'player';
+      this.turnMessage();
+    }
+  }
+
+  computerPlayerAttack() {
+    let x, y, result;
+
+    do {
+      x = Math.floor(Math.random() * 10);
+      y = Math.floor(Math.random() * 10);
+      result = this.realPlayer.gameboard.receiveAttack(x, y);
+    } while (result.ok !== true);
+
+    renderRealPlayerGameboard(this.realPlayer);
+    const isWon = this.gameOver();
+    if (isWon) {
+      setTimeout(() => this.resetGame(), 2000);
+      return;
+    }
+    this.switchTurn();
+  }
+
+  gameOver() {
+    let isDefeated;
+
+    if (this.turn === 'player') {
+      if ((isDefeated = this.computerPlayer.gameboard.areAllShipsSunk())) {
+        this.state = 'post';
+        this.stateMessage();
+        this.winner = 'player';
+        setTimeout(() => this.wonMessage(), 1000);
+        return true;
+      }
+    } else {
+      if ((isDefeated = this.realPlayer.gameboard.areAllShipsSunk())) {
+        this.state = 'post';
+        this.stateMessage();
+        this.winner = 'computer';
+        setTimeout(() => this.wonMessage(), 1000);
+        return true;
+      }
+    }
+  }
+
+  resetGame() {
+    this.realPlayer = new Player('real');
+    this.computerPlayer = new Player('computer');
+
+    this.turn = null;
+    this.state = 'init';
+    this.error = null;
+    this.winner = null;
+
+    renderRealPlayerGameboard(this.realPlayer);
+    renderComputerPlayerGameboard(this.computerPlayer);
+
+    this.stateMessage();
+
+    this.realPlayerAttack();
+  }
+
+  stateMessage() {
+    renderStateMessage(this.state);
+  }
+
+  turnMessage() {
+    renderTurnMessage(this.turn);
+  }
+
+  showError(errorCode) {
+    this.error = errorCode;
+    this.errorMessage();
+    setTimeout(() => {
+      this.error = null;
+      this.errorMessage();
+    }, 1250);
+  }
+
+  errorMessage() {
+    renderErrorMessage(this.error);
+  }
+
+  wonMessage() {
+    renderWonMessage(this.winner);
+  }
+
+  realPlayerGameStatics() {
+    renderRealPlayerStatics(this.realPlayer.gameboard);
+  }
+
+  computerPlayerGameStatics() {
+    renderComputerPlayerStatics(this.computerPlayer.gameboard);
   }
 }
-
-//Your event listeners should step through the game turn by turn using only methods from other objects.
-//If at any point you are tempted to write a new function, step back and figure out which class or module that function should belong to.
-//For attacks, let the user click on a coordinate in the enemy Gameboard. Send the user input to methods on your objects,
-//and re-render the boards to display the new information. Players should take turns playing the game by attacking the enemy Gameboard.
-//If you feel the need to keep track of the current player’s turn, it’s appropriate to manage that in this module, instead of another mentioned object.
-//The game is played against the computer, so make the ‘computer’ players capable of making random plays. The computer does not have to be smart,
-//but it should know whether or not a given move is legal (i.e. it shouldn’t shoot the same coordinate twice).
-// Create conditions so that the game ends once one player’s ships have all been sunk. This function is also appropriate for this module.

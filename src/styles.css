@@ -68,9 +68,12 @@ body {
   gap: 2rem;
 }
 
-.gameInstructions {
+.gameMessages {
   display: flex;
+  flex-direction: column;
   justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .playerBoard,
@@ -96,7 +99,7 @@ body {
   gap: 0.5rem;
 }
 
-.boardCell {
+.cell {
   border: 1px solid black;
 }
 
@@ -104,10 +107,15 @@ body {
   background-color: gray;
 }
 
-.missed {
+.miss {
   background-color: yellow;
 }
 
 .hit {
   background-color: red;
+}
+
+.error {
+  font-size: 12px;
+  color: red;
 }

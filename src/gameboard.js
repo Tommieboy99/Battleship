@@ -67,14 +67,14 @@ export class Gameboard {
 
   receiveAttack(x, y) {
     if (x < 0 || x > 9 || y < 0 || y > 9) {
-      return { hit: false, error: 'ATTACK_OUT_OF_BOUNDS' };
+      return { ok: false, error: 'ATTACK_OUT_OF_BOUNDS' };
     }
 
     const allShots = this.hitShots.concat(this.missedShots);
 
     for (const [cx, cy] of allShots) {
       if (cx === x && cy === y) {
-        return { hit: false, error: 'ALREADY_ATTACKED_COORDINATE' };
+        return { ok: false, error: 'ALREADY_ATTACKED_COORDINATE' };
       }
     }
 
@@ -84,10 +84,10 @@ export class Gameboard {
       const ship = this.board[x][y];
       ship.hit();
       this.hitShots.push([x, y]);
-      return { hit: true };
+      return { ok: true };
     } else {
       this.missedShots.push([x, y]);
-      return { hit: false };
+      return { ok: true };
     }
   }
 
